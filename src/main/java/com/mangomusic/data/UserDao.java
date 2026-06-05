@@ -22,7 +22,7 @@ public class UserDao {
         List<User> users = new ArrayList<>();
         String query = "SELECT user_id, username, email, signup_date, subscription_type, country " +
                 "FROM users " +
-                "WHERE username LIKE ? OR email LIKE ? " +
+                "WHERE username LIKE ?" +
                 "ORDER BY username";
 
         try {
@@ -30,7 +30,6 @@ public class UserDao {
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
 
-                statement.setString(1, "%" + username + "%");
                 statement.setString(1, "%" + username + "%");
 
                 try (ResultSet results = statement.executeQuery()) {
