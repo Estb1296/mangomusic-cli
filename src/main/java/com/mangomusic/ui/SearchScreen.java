@@ -231,7 +231,7 @@ public class SearchScreen {
 
         String searchTerm = InputValidator.getNonEmptyString("\nEnter album title to search: ");
 
-        List<Album> albums = albumDao.searchAlbums(searchTerm);
+        List<Album> albums = albumDao.searchAlbumsByTitle(searchTerm);
 
         if (albums.isEmpty()) {
             ConsoleColors.printWarning("No albums found matching: " + searchTerm);

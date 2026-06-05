@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +83,7 @@ public class AlbumDao {
         return albums;
     }
 
-    public List<Album> searchAlbums(String searchTerm) {
+    public List<Album> searchAlbumsByTitle(String searchTerm) {
         List<Album> albums = new ArrayList<>();
         String query = "SELECT al.album_id, al.artist_id, al.title, al.release_year, ar.name as artist_name " +
                 "FROM albums al " +
@@ -102,8 +101,7 @@ public class AlbumDao {
                 try (ResultSet results = statement.executeQuery()) {
                     while (results.next()) {
                         int albumId = results.getInt("album_id");
-                        String artistIdStr = results.getString("artist_id");
-                        int artistId = Integer.parseInt(artistIdStr);
+                        int artistId = results.getInt("artist_id");
                         String title = results.getString("title");
                         int releaseYear = results.getInt("release_year");
                         String artistName = results.getString("artist_name");
