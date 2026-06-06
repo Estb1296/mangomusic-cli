@@ -751,9 +751,55 @@ public class ReportsDao {
                 }
             }
         } catch (SQLException e) {
+            System.out.println("Unable to pull up results now.");
             e.printStackTrace();
         }
         return results;
     }
+    public List<ReportResult> getUserDiversityReport(){
+        List<ReportResult> results = new ArrayList<>();
+        String diveryScoreQuery = """
+                SELECT * , (distinct_genres / distinct_artists_played) * 100.0 AS diversity_score
+                FROM(
+                SELECT users.user_id,username, subscription_type,
+                count(distinct artists.artist_id) AS  distinct_artists_played,
+                count(distinct artists.primary_genre) AS distinct_genres,
+                count(album_plays.play_id) AS total_plays
+                From users
+                JOIN album_plays
+                	on users.user_id = album_plays.user_id
+                JOIN albums
+                	on album_plays.album_id = albums.album_id
+                JOIN artists
+                	on albums.artist_id = artists.artist_id
+                GROUP BY users.user_id
+                )ranked
+                HAVING total_plays > 20
+                ORDER BY diversity_score DESC;
+                """;
+        try {
+            Connection connection = dataManager.getConnection();
 
+            try (PreparedStatement statement = connection.prepareStatement(diveryScoreQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    ReportResult result = new ReportResult();
+                    result.addColumn("user_id",resultSet.getInt("user_id"));
+                    result.addColumn("username",resultSet.getString("username"));
+                    result.addColumn("subscription_type",resultSet.getString("subscription_type"));
+                    result.addColumn("distinct_genres",resultSet.getInt("distinct_genres"));
+                    result.addColumn("distinct_artists_played",resultSet.getInt("distinct_artists_played"));
+                    result.addColumn("total_plays",resultSet.getInt("total_plays"));
+                    result.addColumn("diversity_score",resultSet.getDouble("diversity_score"));
+                    results.add(result);
+            }
+        }
+        }catch (SQLException e) {
+            System.out.println("Unable to pull up results now.");
+            e.printStackTrace();
+
+        }
+        return results;
     }
+    }
+

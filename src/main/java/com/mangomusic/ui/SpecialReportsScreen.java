@@ -22,7 +22,7 @@ public class SpecialReportsScreen {
             InputValidator.clearScreen();
             displayMenu();
 
-            int choice = InputValidator.getIntInRange("Select an option: ", 0, 2);
+            int choice = InputValidator.getIntInRange("Select an option: ", 0, 3);
 
             switch (choice) {
                 case 1:
@@ -34,7 +34,7 @@ public class SpecialReportsScreen {
                     break;
                 case 3:
                     //@TODO - Create report
-//                    showUserDiversityScore();
+                    showUserDiversityScore();
                     break;
                 case 4:
                     //@TODO - Create report
@@ -103,7 +103,7 @@ public class SpecialReportsScreen {
 
         InputValidator.pressEnterToContinue();
     }
-    public void showMostPlayedAlbumsByGenre(){
+        private void showMostPlayedAlbumsByGenre(){
         List<ReportResult> results = reportsDao.getMostPlayedAlbumsByGenre();
         if(results.isEmpty()){
             System.out.println("Something went wrong! Unable to pull up searches.");
@@ -119,4 +119,24 @@ public class SpecialReportsScreen {
                     result.getInt("genre_rank"));
         }
     }
+
+    private void  showUserDiversityScore(){
+        List<ReportResult>results = reportsDao.getUserDiversityReport();
+        if(results.isEmpty()){
+            System.out.println("Something went wrong! Unable to pull up searches.");
+        }
+        System.out.println("User ID  Username             Subscription          Artists  Genres  Plays   Diversity");
+        System.out.println("-------  -------------------  ---------------       -------  -------  -----   ----------");
+        for(ReportResult result:results){
+            System.out.printf("%-7d  %-23s  %-15s  %7d  %7d  %5d   %8.2f %n",
+            result.getInt("user_id"),
+            result.getString("username"),
+            result.getString("subscription_type"),
+            result.getInt("distinct_artists_played"),
+            result.getInt("distinct_genres"),
+            result.getInt("total_plays"),
+            result.getDouble("diversity_score"));
+        }
+    }
+
 }
