@@ -797,7 +797,38 @@ public class ReportsDao {
         }catch (SQLException e) {
             System.out.println("Unable to pull up results now.");
             e.printStackTrace();
+        }
+        return results;
 
+    }
+    public List<ReportResult> getPeakListeningHoursReport(){
+        List<ReportResult> results = new ArrayList<>();
+        String listeningHoursQuery = """
+                SELECT Extract(HOUR FROM album_plays.played_at) AS  hour_of_day,
+                 count(album_plays.play_id) AS total_plays,
+                 count(distinct user_id) AS unique_users,
+                 Round(COUNT(play_id) / COUNT(DISTINCT user_id),2) AS avg_plays_per_user
+                From album_plays
+                GROUP BY hour_of_day
+                ORDER BY hour_of_day;
+                """;
+        try {
+            Connection connection = dataManager.getConnection();
+
+            try (PreparedStatement statement = connection.prepareStatement(listeningHoursQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    ReportResult result = new ReportResult();
+                    result.addColumn("hour_of_day",resultSet.getInt("hour_of_day"));
+                    result.addColumn("total_plays",resultSet.getInt("total_plays"));
+                    result.addColumn("unique_users",resultSet.getInt("unique_users"));
+                    result.addColumn("avg_plays_per_user",resultSet.getInt("avg_plays_per_user"));
+                    results.add(result);
+                }
+            }
+        }catch(SQLException e){
+            System.out.println("Unable to pull listening hours data.");
+            e.printStackTrace();
         }
         return results;
     }

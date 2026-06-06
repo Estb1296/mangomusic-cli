@@ -22,7 +22,7 @@ public class SpecialReportsScreen {
             InputValidator.clearScreen();
             displayMenu();
 
-            int choice = InputValidator.getIntInRange("Select an option: ", 0, 3);
+            int choice = InputValidator.getIntInRange("Select an option: ", 0, 4);
 
             switch (choice) {
                 case 1:
@@ -38,7 +38,7 @@ public class SpecialReportsScreen {
                     break;
                 case 4:
                     //@TODO - Create report
-//                    showPeakListeningHours();
+                    showPeakListeningHours();
                     break;
                 case 0:
                     running = false;
@@ -136,6 +136,21 @@ public class SpecialReportsScreen {
             result.getInt("distinct_genres"),
             result.getInt("total_plays"),
             result.getDouble("diversity_score"));
+        }
+    }
+    private void showPeakListeningHours(){
+        List<ReportResult>results = reportsDao.getPeakListeningHoursReport();
+        if(results.isEmpty()){
+            System.out.println("Something went wrong! Unable to pull up data.");
+        }
+        System.out.println("Hour   Total Plays  Unique Users  Avg Plays/User");
+        System.out.println("----   -----------  ------------  --------------");
+        for(ReportResult result:results){
+            System.out.printf("%2d     %11d  %12d  %14.2f %n",
+            result.getInt("hour_of_day"),
+            result.getInt("total_plays"),
+            result.getInt("unique_users"),
+            result.getDouble("avg_plays_per_user"));
         }
     }
 
