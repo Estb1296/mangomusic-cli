@@ -15,6 +15,7 @@ public class ReportResult {
         this.data = new LinkedHashMap<>(); // Maintains insertion order
     }
 
+
     /**
      * Adds a column value to the result
      */

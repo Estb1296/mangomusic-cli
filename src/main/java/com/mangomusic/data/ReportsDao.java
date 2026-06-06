@@ -677,4 +677,83 @@ public class ReportsDao {
             return "Emerging Fan";
         }
     }
-}
+    public List<ReportResult> getMostPlayedAlbumsByGenre() {
+        List<ReportResult> results = new ArrayList<>();
+        String mostPlayedAlbumByGenreQuery = """
+               
+                SELECT
+                                   genre,
+                                   album_title,
+                                   artist_name,
+                                   play_count,
+                                   genre_rank
+                               FROM (
+                                   -- PART 1: Main aggregation - Get albums with their play counts grouped by genre
+                                   SELECT
+                                       artists.primary_genre AS genre,
+                                       albums.title AS album_title,
+                                       artists.name AS artist_name,
+                                       COUNT(album_plays.play_id) AS play_count,
+                
+                                       -- PART 2: Correlated subquery - Calculate rank within genre
+                                       (SELECT COUNT(*) + 1
+                                        FROM (
+                                            -- PART 2A: Inner subquery - Get all albums in the same genre with their play counts
+                                            SELECT
+                                                albums.album_id,
+                                                COUNT(album_plays.play_id) AS play_cnt,
+                                                artists.primary_genre
+                                                FROM albums
+                                            JOIN album_plays ON albums.album_id = album_plays.album_id
+                                            JOIN artists ON albums.artist_id = artists.artist_id
+                                            GROUP BY albums.album_id, artists.primary_genre
+                                        ) AS album_plays_in_genre
+                                        -- PART 2B: Count how many albums in same genre have MORE plays than current album
+                                        WHERE album_plays_in_genre.primary_genre = artists.primary_genre
+                                          AND album_plays_in_genre.play_cnt > COUNT(album_plays.play_id)
+                                       ) AS genre_rank
+                
+                                   FROM albums
+                                   JOIN album_plays ON albums.album_id = album_plays.album_id
+                                   JOIN artists ON albums.artist_id = artists.artist_id
+                
+                                   -- Group by genre and album to aggregate plays
+                                   GROUP BY artists.primary_genre, albums.album_id, albums.title, artists.name
+                               ) AS ranked
+                
+                               -- PART 3: Filter for genres with at least 5 albums
+                               WHERE genre_rank <= 5
+                                 AND genre IN (
+                                   SELECT artists.primary_genre
+                                   FROM albums
+                                   JOIN artists ON albums.artist_id = artists.artist_id
+                                   GROUP BY artists.primary_genre
+                                   HAVING COUNT(DISTINCT albums.album_id) >= 5
+                                 )
+                
+                               -- PART 4: Order results
+                               ORDER BY genre, play_count DESC;
+                """;
+        try {
+            Connection connection = dataManager.getConnection();
+
+            try (PreparedStatement statement = connection.prepareStatement(mostPlayedAlbumByGenreQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    ReportResult result = new ReportResult();
+                    result.addColumn("genre", resultSet.getString("genre"));
+                    result.addColumn("album_title", resultSet.getString("album_title"));
+                    result.addColumn("artist_name", resultSet.getString("artist_name"));  // NOT "name"
+                    result.addColumn("play_count", resultSet.getInt("play_count"));
+                    result.addColumn("genre_rank", resultSet.getInt("genre_rank"));
+                    results.add(result);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    }

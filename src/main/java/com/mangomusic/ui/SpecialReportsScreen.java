@@ -5,6 +5,8 @@ import com.mangomusic.models.ReportResult;
 import com.mangomusic.util.ConsoleColors;
 import com.mangomusic.util.InputValidator;
 
+import java.util.List;
+
 public class SpecialReportsScreen {
 
     private final ReportsDao reportsDao;
@@ -20,7 +22,7 @@ public class SpecialReportsScreen {
             InputValidator.clearScreen();
             displayMenu();
 
-            int choice = InputValidator.getIntInRange("Select an option: ", 0, 1);
+            int choice = InputValidator.getIntInRange("Select an option: ", 0, 2);
 
             switch (choice) {
                 case 1:
@@ -28,7 +30,7 @@ public class SpecialReportsScreen {
                     break;
                 case 2:
                     //@TODO - Create report
-//                    showMostPlayedAlbumsByGenre();
+                    showMostPlayedAlbumsByGenre();
                     break;
                 case 3:
                     //@TODO - Create report
@@ -100,5 +102,21 @@ public class SpecialReportsScreen {
         }
 
         InputValidator.pressEnterToContinue();
+    }
+    public void showMostPlayedAlbumsByGenre(){
+        List<ReportResult> results = reportsDao.getMostPlayedAlbumsByGenre();
+        if(results.isEmpty()){
+            System.out.println("Something went wrong! Unable to pull up searches.");
+        }
+        System.out.println("Genre          Album Title                                               Artist Name                           Plays    Rank");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------");
+        for (ReportResult result : results) {
+            System.out.printf("%-15s  %-55s %-35s %7d   %3d %n",
+                    result.getString("genre"),
+                    result.getString("album_title"),
+                    result.getString("artist_name"),
+                    result.getInt("play_count"),
+                    result.getInt("genre_rank"));
+        }
     }
 }
