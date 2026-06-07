@@ -2,10 +2,7 @@ package com.mangomusic;
 
 import com.mangomusic.config.DatabaseConfig;
 import com.mangomusic.data.*;
-import com.mangomusic.ui.HomeScreen;
-import com.mangomusic.ui.ReportsScreen;
-import com.mangomusic.ui.SearchScreen;
-import com.mangomusic.ui.SpecialReportsScreen;
+import com.mangomusic.ui.*;
 
 public class Main {
 
@@ -26,7 +23,8 @@ public class Main {
             SearchScreen searchScreen = new SearchScreen(artistDao, albumDao, userDao, albumPlayDao);
             ReportsScreen reportsScreen = new ReportsScreen(reportsDao);
             SpecialReportsScreen specialReportsScreen = new SpecialReportsScreen(reportsDao);
-            HomeScreen homeScreen = new HomeScreen(searchScreen, reportsScreen, specialReportsScreen);
+            CatalogManagementScreen catalogManagementScreen = new CatalogManagementScreen(reportsDao);
+            HomeScreen homeScreen = new HomeScreen(searchScreen, reportsScreen, specialReportsScreen,catalogManagementScreen);
 
             homeScreen.display();
 

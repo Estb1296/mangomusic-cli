@@ -832,5 +832,48 @@ public class ReportsDao {
         }
         return results;
     }
+    public List<ReportResult>getAlbumCompletionLeaderboard(){
+        List<ReportResult> results = new ArrayList<>();
+        String albumCompletionRankQuery = """
+                SELECT\s
+                    albums.title AS album_title,\s
+                    artists.name AS artist_name,
+                    artists.primary_genre AS genre,
+                    COUNT(album_plays.play_id) AS total_plays,
+                    SUM(CASE WHEN album_plays.completed = TRUE THEN 1 ELSE 0 END) AS completed_plays,
+                    ROUND(SUM(CASE WHEN album_plays.completed = TRUE THEN 1 ELSE 0 END)\s
+                    / COUNT(album_plays.play_id) * 100, 2) AS completion_rate
+                FROM album_plays
+                JOIN albums\s
+                		ON album_plays.album_id = albums.album_id
+                JOIN artists\s
+                		ON albums.artist_id = artists.artist_id
+                GROUP BY albums.album_id, albums.title, artists.artist_id, artists.name, artists.primary_genre
+                HAVING COUNT(album_plays.play_id) >= 50
+                ORDER BY completion_rate DESC
+                LIMIT 25;
+                """;
+        try {
+            Connection connection = dataManager.getConnection();
+
+            try (PreparedStatement statement = connection.prepareStatement(albumCompletionRankQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    ReportResult result = new ReportResult();
+                    result.addColumn("album_title",resultSet.getString("album_title"));
+                    result.addColumn("artist_name",resultSet.getString("artist_name"));
+                    result.addColumn("genre",resultSet.getString("genre"));
+                    result.addColumn("total_plays",resultSet.getInt("total_plays"));
+                    result.addColumn("completed_plays",resultSet.getInt("completed_plays"));
+                    result.addColumn("completion_rate",resultSet.getInt("completion_rate"));
+                    results.add(result);
+                }
+            }
+        }catch(SQLException e){
+            System.out.println("Unable to pull listening hours data.");
+            e.printStackTrace();
+        }
+        return results;
+    }
     }
 

@@ -11,12 +11,14 @@ public class HomeScreen {
     private final SearchScreen searchScreen;
     private final ReportsScreen reportsScreen;
     private final SpecialReportsScreen specialReportsScreen;
+    private final CatalogManagementScreen catalogManagementScreen;
 
     public HomeScreen(SearchScreen searchScreen, ReportsScreen reportsScreen,
-                      SpecialReportsScreen specialReportsScreen) {
+                      SpecialReportsScreen specialReportsScreen,CatalogManagementScreen catalogManagementScreen) {
         this.searchScreen = searchScreen;
         this.reportsScreen = reportsScreen;
         this.specialReportsScreen = specialReportsScreen;
+        this.catalogManagementScreen = catalogManagementScreen;
     }
 
     /**
@@ -29,7 +31,7 @@ public class HomeScreen {
             InputValidator.clearScreen();
             displayMenu();
 
-            int choice = InputValidator.getIntInRange("Select an option: ", 0, 3);
+            int choice = InputValidator.getIntInRange("Select an option: ", 0, 4);
 
             switch (choice) {
                 case 1:
@@ -41,6 +43,8 @@ public class HomeScreen {
                 case 3:
                     specialReportsScreen.display();
                     break;
+                case 4:
+                    catalogManagementScreen.display();
                 case 0:
                     running = false;
                     System.out.println("\nThank you for using MangoMusic Database Tool!");
@@ -58,6 +62,7 @@ public class HomeScreen {
         System.out.println("\n1. Search & Queries");
         System.out.println("2. View Reports");
         System.out.println("3. Special Reports");
+        System.out.println("4. Bonus Searches");
         System.out.println("0. Exit");
         System.out.println();
     }

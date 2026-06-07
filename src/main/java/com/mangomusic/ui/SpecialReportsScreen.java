@@ -153,5 +153,4 @@ public class SpecialReportsScreen {
             result.getDouble("avg_plays_per_user"));
         }
     }
-
 }
